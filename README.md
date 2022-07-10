@@ -58,43 +58,86 @@ int main(){
 
 #by python
 
-import random
-
-m =[[2,3,3,3,3,3,4,4,4,4,4,4],
-	[2,3,3,3,3,3,4,4,4,4,4,4],
-	[3,3,3,1,3,3,4,1,4,4,0,4],
-	[3,3,1,1,1,3,1,1,1,4,4,4],
-	[3,1,1,1,1,1,1,1,1,1,4,4],
-	[3,1,1,0,0,0,0,0,1,1,4,4],
-	[3,1,1,0,0,0,0,0,1,1,4,4],
-	[2,1,1,1,1,0,0,0,1,1,2,2],
-	[2,1,1,1,0,0,0,0,1,2,2,2],
-	[2,2,1,1,1,0,0,2,2,2,1,0],
-	[2,2,2,1,1,0,0,2,2,2,1,1],
-	[2,2,2,2,2,2,2,2,2,0,1,0]
-	]
-
-def flood_recursive(matrix):
-	width = len(matrix)
-	height = len(matrix[0])
-	def fill(x,y,start_color,color_to_update):
-		#if the square is not the same color as the starting point
-		if matrix[x][y] != start_color:
-			return
-		#if the square is not the new color
-		elif matrix[x][y] == color_to_update:
-			return
-		else:
-			#update the color of the current square to the replacement color
-			matrix[x][y] = color_to_update
-			neighbors = [(x-1,y),(x+1,y),(x-1,y-1),(x+1,y+1),(x-1,y+1),(x+1,y-1),(x,y-1),(x,y+1)]
-			for n in neighbors:
-				if 0 <= n[0] <= width-1 and 0 <= n[1] <= height-1:
-					fill(n[0],n[1],start_color,color_to_update)
-	start_x = random.randint(0,width-1)
-	start_y = random.randint(0,height-1)
-	start_color = matrix[start_x][start_y]
-	fill(start_x,start_y,start_color,9)
-	return matrix
-
-flood_recursive(m)
+from collections import deque
+ 
+ 
+# Below lists detail all eight possible movements
+row = [-1, -1, -1, 0, 0, 1, 1, 1]
+col = [-1, 0, 1, -1, 1, -1, 0, 1]
+ 
+ 
+# check if it is possible to go to pixel (x, y) from the
+# current pixel. The function returns false if the pixel
+# has a different color, or it's not a valid pixel
+def isSafe(mat, x, y, target):
+    return 0 <= x < len(mat) and 0 <= y < len(mat[0]) and mat[x][y] == target
+ 
+ 
+# Flood fill using BFS
+def floodfill(mat, x, y, replacement):
+ 
+    # base case
+    if not mat or not len(mat):
+        return
+ 
+    # create a queue and enqueue starting pixel
+    q = deque()
+    q.append((x, y))
+ 
+    # get the target color
+    target = mat[x][y]
+ 
+    # target color is same as replacement
+    if target == replacement:
+        return
+ 
+    # break when the queue becomes empty
+    while q:
+ 
+        # dequeue front node and process it
+        x, y = q.popleft()
+ 
+        # replace the current pixel color with that of replacement
+        mat[x][y] = replacement
+ 
+        # process all eight adjacent pixels of the current pixel and
+        # enqueue each valid pixel
+        for k in range(len(row)):
+            # if the adjacent pixel at position (x + row[k], y + col[k]) is
+            # is valid and has the same color as the current pixel
+            if isSafe(mat, x + row[k], y + col[k], target):
+                # enqueue adjacent pixel
+                q.append((x + row[k], y + col[k]))
+ 
+ 
+if __name__ == '__main__':
+ 
+    # matrix showing portion of the screen having different colors
+    mat = [
+            ['Y', 'Y', 'Y', 'G', 'G', 'G', 'G', 'G', 'G', 'G'],
+            ['Y', 'Y', 'Y', 'Y', 'Y', 'Y', 'G', 'X', 'X', 'X'],
+            ['G', 'G', 'G', 'G', 'G', 'G', 'G', 'X', 'X', 'X'],
+            ['W', 'W', 'W', 'W', 'W', 'G', 'G', 'G', 'G', 'X'],
+            ['W', 'R', 'R', 'R', 'R', 'R', 'G', 'X', 'X', 'X'],
+            ['W', 'W', 'W', 'R', 'R', 'G', 'G', 'X', 'X', 'X'],
+            ['W', 'B', 'W', 'R', 'R', 'R', 'R', 'R', 'R', 'X'],
+            ['W', 'B', 'B', 'B', 'B', 'R', 'R', 'X', 'X', 'X'],
+            ['W', 'B', 'B', 'X', 'B', 'B', 'B', 'B', 'X', 'X'],
+            ['W', 'B', 'B', 'X', 'X', 'X', 'X', 'X', 'X', 'X']
+    ]
+ 
+    # start node
+    x = 3
+    y = 9
+ 
+    # having target color `X`
+    # replacement color
+    replacement = 'C'
+ 
+    # replace the target color with a replacement color
+    floodfill(mat, x, y, replacement)
+ 
+    # print the colors after replacement
+    for r in mat:
+        print(r)
+ 
